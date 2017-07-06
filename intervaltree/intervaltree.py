@@ -772,11 +772,13 @@ class IntervalTree(collections.MutableSet):
         """
         return 0 == len(self)
 
-    def search(self, begin, end=None, strict=False):
+    def search(self, begin, end=None, option=None):
         """
-        Returns a set of all intervals overlapping the given range. Or,
-        if strict is True, returns the set of all intervals fully
+        Returns a set of all intervals overlapping the given range.
+        Or, if overlap is 'contained', returns the set of all intervals fully
         contained in the range [begin, end].
+        Or, if overlap is 'containing', returns the set of all intervals fully
+        containing the range [begin, end].
         
         Completes in O(m + k*log n) time, where:
           * n = size of the tree
@@ -790,7 +792,7 @@ class IntervalTree(collections.MutableSet):
         if end is None:
             try:
                 iv = begin
-                return self.search(iv.begin, iv.end, strict=strict)
+                return self.search(iv.begin, iv.end, option=option)
             except:
                 return root.search_point(begin, set())
         elif begin >= end:
@@ -807,10 +809,15 @@ class IntervalTree(collections.MutableSet):
             ))
 
             # TODO: improve strict search to use node info instead of less-efficient filtering
-            if strict:
+            if option == 'contained':
                 result = set(
                     iv for iv in result
                     if iv.begin >= begin and iv.end <= end
+                )
+            elif option == 'containing':
+                result = set(
+                    iv for iv in result
+                    if iv.begin <= begin and iv.end >= end
                 )
             return result
     
